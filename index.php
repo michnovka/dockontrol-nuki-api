@@ -22,8 +22,8 @@ $password1 = $access[$_GET['username']]['password1'];
 $password2 = $access[$_GET['username']]['password2'];
 
 // authenticate TOTP1 and TOTP2
-$secret1 = GoogleAuthenticator::hex_to_base32(substr(hash('sha256', $password1),0,20));
-$secret2 = GoogleAuthenticator::hex_to_base32(substr(hash('sha256', $password2),0,20));
+$secret1 = str_pad(GoogleAuthenticator::hex_to_base32(substr(hash('sha256', $password1),0,20)), 16, 'A', STR_PAD_LEFT);
+$secret2 = str_pad(GoogleAuthenticator::hex_to_base32(substr(hash('sha256', $password2),0,20)), 16, 'A', STR_PAD_LEFT);
 
 if(
 	empty($_GET['totp1']) || strlen($_GET['totp1']) != 6 ||
