@@ -1,5 +1,7 @@
 <?php
 
+$SQLITE_FILE = '/path/to/DB/dockontrol.db';
+
 $access = array(
 	'admin' => array(
 		'password1' => 'PASSWORD_SAVED_ON_DOCKONTROL',
