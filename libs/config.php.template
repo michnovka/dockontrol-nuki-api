@@ -1,22 +1,22 @@
 <?php
 
+namespace Dockontrol\NukiAPI;
+
+require_once dirname(__FILE__) . '/Access.php';
+
 $SQLITE_FILE = '/path/to/DB/dockontrol.db';
 
-$access = array(
-	'admin' => array(
-		'password1' => 'PASSWORD_SAVED_ON_DOCKONTROL',
-		'password2' => 'PASSWORD_SAVED_IN_BROWSER',
-		'nuki_ip' => '192.168.1.XXX',
-		'nuki_port' => '8080',
-		'nuki_id' => 'XXXXXX',
-		'nuki_token' => 'XXXXXXXXXXXX',
-		'device_type' => '0',
-		// can be false/null to allow any IP
-		'ip_whitelist' => array('1.2.3.4','5.6.7.8'),
-		// these will be looked up and IP compared
-		'domain_whitelist' => array('dockontrol.com'),
-		'sandbox' => false,
-	)
-);
-
-
+$access_list = [
+	'admin' => new Access(
+		'PASSWORD_SAVED_ON_DOCKONTROL',
+		'PASSWORD_SAVED_IN_BROWSER',
+		'192.168.1.XXX',
+		8080,
+		111111111111111,
+		'XXXXXX',
+		'0',
+		['1.2.3.4'],
+		['dockontrol.local'],
+		false
+	),
+];
