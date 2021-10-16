@@ -15,7 +15,21 @@ if(empty($access[$_GET['username']])){
 	APIError("Unauthorized");
 }
 if(!empty($access[$_GET['username']]['ip_whitelist']) && !in_array($_SERVER['REMOTE_ADDR'], $access[$_GET['username']]['ip_whitelist'])){
-	APIError("Unauthorized IP");
+	$access_granted = false;
+
+	if(!empty($access[$_GET['username']]['domain_whitelist'])){
+		foreach($access[$_GET['username']]['domain_whitelist'] as $domain){
+			$ips = gethostbynamel($domain);
+			
+			if(array_search($_SERVER['REMOTE_ADDR'], $ips)){
+				$access_granted = true;
+				break;
+			}
+		}
+	}
+	
+	if(!$access_granted)
+		APIError("Unauthorized IP");
 }
 
 $password1 = $access[$_GET['username']]['password1'];
@@ -60,6 +74,8 @@ $device_type = $access[$_GET['username']]['device_type'];
 
 $nuki_action = null;
 
+$is_sandbox = $access[$_GET['username']]['sandbox'];
+
 switch($_GET['action']) {
 	case 'unlock':
 		// unlatch
@@ -77,20 +93,26 @@ $ts = gmdate('Y-m-d')."T".gmdate('H:i:s')."Z";
 $rnr = rand(0, 65535);
 $hash = hash('sha256', $ts.','.$rnr.",".$nuki_token);
 
-$url = 'http://'.$nuki_ip.':'.$nuki_port.'/lockAction?nukiId='.intval($nuki_id).'&deviceType='.$device_type.'&action='.intval($nuki_action).'&nowait=0&ts='.$ts.'&rnr='.$rnr.'&hash='.$hash;
+$reply = array();
 
-$ch = curl_init();
-$headers = array(
-	'Accept: application/json',
-	'Content-Type: application/json',
-);
-
-curl_setopt($ch, CURLOPT_URL, $url);
-curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-curl_setopt($ch, CURLOPT_HEADER, 0);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-$reply = json_decode(curl_exec($ch), true);
+if($is_sandbox){
+	$reply['success'] = true;
+}else {
+	$url = 'http://' . $nuki_ip . ':' . $nuki_port . '/lockAction?nukiId=' . intval($nuki_id) . '&deviceType=' . $device_type . '&action=' . intval($nuki_action) . '&nowait=1&ts=' . $ts . '&rnr=' . $rnr . '&hash=' . $hash;
+	
+	$ch = curl_init();
+	$headers = array(
+		'Accept: application/json',
+		'Content-Type: application/json',
+	);
+	
+	curl_setopt($ch, CURLOPT_URL, $url);
+	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+	curl_setopt($ch, CURLOPT_HEADER, 0);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	$reply_raw = curl_exec($ch);
+	$reply = json_decode($reply_raw, true);
+}
 
 if($reply['success']){
 	echo json_encode(array(
@@ -99,5 +121,5 @@ if($reply['success']){
 	));
 	exit;
 }else{
-	APIError("Unknown error");
+	APIError("Unknown error on local API");
 }

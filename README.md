@@ -4,7 +4,7 @@ Bridge between https://github.com/michnovka/dockontrol and LAN NUKI bridge to al
 
 ## Requirements
 
-PHP 7+ (with SQLite3 and BCMath)
+PHP 7+ (with SQLite3 and BCMath), synchronized time with NTP
 
 ## Configuration
 
