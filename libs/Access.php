@@ -193,12 +193,12 @@ class Access
 		
 		if(!empty($this->getIpWhitelist()) && !in_array($ip, $this->getIpWhitelist())){
 			$access_granted = false;
-			
-			if(!empty($access[$_GET['username']]['domain_whitelist'])){
-				foreach($access[$_GET['username']]['domain_whitelist'] as $domain){
+
+            if(!empty($this->getDomainWhitelist())){
+				foreach($this->getDomainWhitelist() as $domain){
 					$ips = gethostbynamel($domain);
-					
-					if(array_search($ip, $ips)){
+
+					if(in_array($ip, $ips)){
 						$access_granted = true;
 						break;
 					}
